@@ -1,5 +1,5 @@
 
-function [i_param_, omega_param_, w_param_, true_anom_, norm_e_, a_, spef_energy_] = cartToOrbitalElements(position_vector_, velocity_vector_, mew_)
+function [i_param_, omega_param_, w_param_, true_anom_, e_x_, e_y_, e_z_, a_, spef_energy_] = cartToOrbitalElements(position_vector_, velocity_vector_, mew_)
     format long
     if(isempty(position_vector_))
         fprintf("How tf you do that? You need to input a vector of length 3")
@@ -27,8 +27,11 @@ function [i_param_, omega_param_, w_param_, true_anom_, norm_e_, a_, spef_energy
     n_hat = n/norm_n;
     
     % Get the eccentricity
-    e_ = (cross(velocity_vector_,h)/mew_) - (position_vector_/norm(position_vector_));
-    norm_e_ = norm(e_);
+    e = (cross(velocity_vector_,h)/mew_) - (position_vector_/norm(position_vector_));
+    norm_e = norm(e);
+    e_x_ = e(1);
+    e_y_ = e(2);
+    e_z_ = e(3);
     
     % Get the position and velocity vectors magnitudes
     norm_vel = norm(velocity_vector_);
@@ -47,10 +50,10 @@ function [i_param_, omega_param_, w_param_, true_anom_, norm_e_, a_, spef_energy
     omega_param_ = acos(dot(n, i_hat)/norm_n);
     
     % Get w param
-    w_param_ = acos(dot(n, e_)/(norm_n*norm_e_));
+    w_param_ = acos(dot(n, e)/(norm_n*norm_e));
     
     % Get the true anomaly
-    true_anom_ = acos(dot(e_,position_vector_)/(norm_e_*norm_pos));
+    true_anom_ = acos(dot(e,position_vector_)/(norm_e*norm_pos));
 
 
 end
