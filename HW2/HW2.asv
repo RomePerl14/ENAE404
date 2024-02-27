@@ -39,8 +39,8 @@ didymos_initial_state = [didymos_initial_x; didymos_initial_y; didymos_initial_z
 [T,Y] = ode45(@myodefun, t, didymos_initial_state, ODE_options, mew_Earth);
 
 for i=1:length(t)
-    [i_didymos(i), omega_didymos(i), w_didymos(i), true_anom_didymos(i), ex_didymos(i), ey_didymos(i), ez_didymos(i), a_didymos(i), spef_energy_didymos(i)] = cartToOrbitalElements([Y(i,1);Y(i,2);Y(i,3)], [Y(i,4);Y(i,5);Y(i,6)], mew_Earth);
-    e(i) = sqrt(ex_didymos(i)^2 + ey_didymos(i)^2 + ez_didymos(i)^2);
+    [i_didymos(i), omega_didymos(i), w_didymos(i), true_anom_didymos(i), ex_didymos(i), ey_didymos(i), ez(i), a(i), spef_energy(i)] = cartToOrbitalElements(r, v, mew_Earth);
+    e(i) = sqrt(ex(i)^2 + ey(i)^2 + ez(i)^2);
 end
 
 

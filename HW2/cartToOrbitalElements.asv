@@ -61,9 +61,6 @@ function [i_param_, omega_param_, w_param_, true_anom_, e_x_, e_y_, e_z_, a_, sp
     a_ = (-mew_)/(2*spef_energy_); % apoapsis
 
     %%%------ Different Cases ------%%%
-    % Is this necessary? not really, but does it help? no. But it makes it
-    % faster right? no, it probably makes it slower in all honesty. But it
-    % will at least be correct, right? yes! (probably not actually)
     if(norm_n == 0)
         if (norm_e == 0) % check if orbit is circular, equitorial
             i_param_ = 0;
@@ -88,7 +85,7 @@ function [i_param_, omega_param_, w_param_, true_anom_, e_x_, e_y_, e_z_, a_, sp
     elseif(norm_n > 0)
         if(norm_e == 0) % check if orbit is circular inclined
             i_param_ = acos(hz/norm_h);
-            w_param_ = 0;
+            w_param = 0;
             omega_param_ = acos(nx/norm_n);
             if(ny < 0) % check condition
                 omega_param_ = 2*pi - omega_param_; % rewrite the omega param to account for shift
@@ -101,17 +98,22 @@ function [i_param_, omega_param_, w_param_, true_anom_, e_x_, e_y_, e_z_, a_, sp
             i_param_ = acos(hz/norm_h);
             w_param_ = acos((dot(n,e))/(norm_n*norm_e));
             if(e_z_ < 0)
-                w_param_ = 2*pi-w_param_; % rewrite w param to account for shift
-            end
-            omega_param_ = acos(nx/norm_n);
-            if(ny < 0)
-                omega_param_ = 2*pi-omega_param_; % rewrite omega param to account for shift
-            end
-            true_anom_ = acos((dot(e,r))/(norm_e*norm_pos));
-            if(dot(position_vector_,velocity_vector_) < 0)
-                true_anom_ = 2*pi-true_anom_; % rewrite true anomaly to account for shift
+                
             end
         end
 
     end
+    % Get i param 
+    i_param_ = acos((dot(h,k_hat))/norm_h);
+    
+    % Get omega param
+    omega_param_ = acos(dot(n, i_hat)/norm_n);
+    
+    % Get w param
+    w_param_ = acos(dot(n, e)/(norm_n*norm_e));
+    
+    % Get the true anomaly
+    true_anom_ = acos(dot(e,position_vector_)/(norm_e*norm_pos));
+
+
 end
