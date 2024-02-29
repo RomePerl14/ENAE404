@@ -12,7 +12,7 @@ v = [-6.9049 ; 4.3136 ; 2.6163]; % velocity vec
 mew_Earth = 398600.44; % gravitational parameter
 
 % Get the orbital elements from the original data, for shits and giggles
-[i_param, omega_param, w_param, true_anom, ex, ey, ez, a, spef_energy] = cartToOrbitalElements(r, v, mew_Earth)
+[i_param, omega_param, w_param, true_anom, ex, ey, ez, a, spef_energy] = cartToOrbitalElements(r, v, mew_Earth, "rad")
 
 %%%----- Q2-1 -----%%%
 % Plot the changing orbital elements as subplots
@@ -40,7 +40,7 @@ didymos_initial_state = [didymos_initial_x; didymos_initial_y; didymos_initial_z
 [T,Y] = ode45(@myodefun, t, didymos_initial_state, ODE_options, mew_sun);
 
 for i=1:length(t)
-    [i_didymos(i), omega_didymos(i), w_didymos(i), true_anom_didymos(i), ex_didymos(i), ey_didymos(i), ez_didymos(i), a_didymos(i), spef_energy_didymos(i)] = cartToOrbitalElements([Y(i,1);Y(i,2);Y(i,3)], [Y(i,4);Y(i,5);Y(i,6)], mew_sun);
+    [i_didymos(i), omega_didymos(i), w_didymos(i), true_anom_didymos(i), ex_didymos(i), ey_didymos(i), ez_didymos(i), a_didymos(i), spef_energy_didymos(i)] = cartToOrbitalElements([Y(i,1);Y(i,2);Y(i,3)], [Y(i,4);Y(i,5);Y(i,6)], mew_sun, "rad");
     e(i) = sqrt(ex_didymos(i)^2 + ey_didymos(i)^2 + ez_didymos(i)^2);
 end
 
