@@ -8,14 +8,14 @@ function [position_vec_, velocity_vec_, spef_enegry_] = orbitalElementsToCart(a_
         true_anom_ = true_anom_*pi/180;        
     end
     % find r_pqw_vec
-    r = (a_*(1-e_^2)/(1+e_*cos(true_anom_))); % First get current radius at true anomaly
+    r = (a_*(1-e_^2))/(1+e_*cos(true_anom_)); % First get current radius at true anomaly
     r_pqw_vec = [r*cos(true_anom_);r*sin(true_anom_);0]; % Now get Rpqw vector
     
     % Find semi-latus rectum (P)
     p = a_*(1-e_^2);
     
     % Get Vpqw
-    v_pqw_vec = sqrt(mew_/p)*[-sin(true_anom_);(e_+cos(true_anom_));0];
+    v_pqw_vec = [(sqrt(mew_/p)*-sin(true_anom_));(sqrt(mew_/p)*(e_+cos(true_anom_)));0];
 
     % Get transformation matrix
     Rz_omega = [cos(-omega_param_), sin(-omega_param_),0; sin(-omega_param_), cos(-omega_param_),0; 0,0,1];
