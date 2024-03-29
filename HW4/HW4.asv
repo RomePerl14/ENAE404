@@ -134,10 +134,4 @@ deltaV4_c = sqrt(vc4^2+ve4^2-(2*vc4*ve4*cosd(i_final4-i_init4)))
 % location is correct so we are working with the correct final velocity 
 % and as such correct deltaV. This being the case, we can use the same 
 % formula:
-% deltaV = sqrt(vc4^2+ve4^2-(2*vc4*ve4*cosd(i_final4-i_init4)))
-% Except our v_ellipse_final (vef) would be found at the new point of 
-% intersection between the original circular orbit, and the new elliptical 
-% orbit. Again, since we are going from large circular to smaller ellipse,
-% our deltaV should be negative
-
 
