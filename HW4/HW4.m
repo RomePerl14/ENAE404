@@ -46,10 +46,7 @@ omega2 = 90;
 w2 = 0;
 e2 = (rp2-ra2)/(-ra2-rp2);
 a2 = rp2/(1-e2);
-r2_des = 8000;
-
-% [r_des, v_des, spef_energy] = orbitalElementsToCart(a2, e2, i2, omega2, w2, true_anom, mew_earth, "deg");
-% rf2 = norm(r_des) % Easier eq to do this but I wanted to use my function :)
+r2_des = 8000;s
 
 % Find true anomaly with respect to r
 true_anom = acosd(((a2*(1-e2^2))-r2_des)/(r2_des*e2)); % value in radians!
