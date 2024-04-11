@@ -33,10 +33,10 @@ v_transfer_apo = sqrt(2*((mew_sun/r_saturn) - (mew_sun/(r_mercury+r_saturn))));
 
 % Now, lets get the escape velocity from mercury
 v_escape_mercury = v_transfer_peri - v_mercury;
-v_escape_hyperbola_mercury = sqrt(2*((mew_mercury/r_craft_mercury) + ((v_escape_mercury^2)/2)));
+v_hyperbola_peri_mercury = sqrt(2*((mew_mercury/r_craft_mercury) + ((v_escape_mercury^2)/2)));
 
 % Now we can find the delta V to get to Saturn
-deltaV1 = v_escape_hyperbola_mercury - v_initial_craft_mercury;
+deltaV1 = v_hyperbola_peri_mercury - v_initial_craft_mercury;
 
 % Now do saturn
 v_escape_saturn = v_saturn - v_transfer_apo;
@@ -44,8 +44,8 @@ v_escape_saturn = v_saturn - v_transfer_apo;
 % MAKING ASSUMPTION THAT HYPERBOLA PERIAPSIS IS SAME AS PARKING ORBIT
 % PERIAPSIS, A. BECAUSE THE PROBLEM DOESN'T SAY WE CAN'T AND B. BECAUSE I
 % WOULD NOT BE ABLE TO SUBMIT THE HW ON TIME
-v_escape_hyperbola_saturn = sqrt(2*((mew_saturn/r_craft_saturn) + ((v_escape_saturn^2)/2)));
-deltaV2 = v_escape_hyperbola_saturn - v_final_craft_saturn;
+v_hyperbola_peri_saturn = sqrt(2*((mew_saturn/r_craft_saturn) + ((v_escape_saturn^2)/2)));
+deltaV2 = v_hyperbola_peri_saturn - v_final_craft_saturn;
 
 % now get the supplementary info
 mass_mercury = .3301*10^24; % kg
@@ -72,8 +72,39 @@ mew_mars = 0.042828 *10^6; % km^3/s^2 - from NASA fact sheet
 r_mars = 227.956 * 10^6;
 v_mars = sqrt(mew_sun/r_mars);
 
-% find escape velocity
-v_escape_mars = sqrt(-mew_mars/a2)
+% find escape velocity and velocity at periapsis
+v_escape_mars2 = sqrt(-mew_mars/a2);
+v_hyperbola_peri_mars2 = sqrt(2*((mew_mars/rp2) + ((v_escape_mars2^2)/2)));
 
+%%% a
+% find v_initial, v_final, and then find deltaV
+v_initalAx = v_escape_mars2*sind(30);
+v_initalAy = v_mars_v_escape_mar;
+v_initalA = [v_initalAx;v_initalAy];
+
+v_finalAx = v_hyperbola_peri_mars2;
+v_finalAy = -v_mars;
+v_finalA = [v_finalAx;v_finalAy];
+
+deltaV_A = v_finalA-v_initalA
+
+%%% b
+% find v_initial, v_final, deltaV, and the components of mars' velocity
+v_marsX = v_mars*sind(30);
+v_marsY = v_mars*cosd(30);
+v_initalBx = v_hyperbola_peri_mars2 + v_marsX;
+v_initalBy = v_marsY;
+v_initalB = [v_initalBx;v_initalBy];
+
+v_finalBx = v_hyperbola_peri_mars2 + v_marsX;
+v_finalBy = -v_marsY;
+v_finalB = [v_finalBx;v_finalBy];
+
+deltaV_B = v_finalB-v_initalB
+norm(deltaV_B)
+
+
+
+%% Q3
 
 

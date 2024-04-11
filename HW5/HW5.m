@@ -76,15 +76,26 @@ v_mars = sqrt(mew_sun/r_mars);
 v_escape_mars2 = sqrt(-mew_mars/a2);
 v_hyperbola_peri_mars2 = sqrt(2*((mew_mars/rp2) + ((v_escape_mars2^2)/2)));
 
+% Get turn angle
+hyperbola_angle = acosd(1/2);
+
 %%% a
 % find v_initial, v_final, and then find deltaV
-v_initalAx = v_hyperbola_peri_mars2;
-v_initalAy = v_mars;
-v_initalA = sqrt(v_initalAx^2 + v_initalAy^2);
+v_mars_vec = [0;v_mars];
+v_escape_mars2_vec = [v_escape_mars2*sind(hyperbola_angle);v_escape_mars2*cosd(hyperbola_angle)];
+v_initalA = v_mars_vec + v_escape_mars2_vec;
 
-v_finalAx = v_hyperbola_peri_mars2;
-v_finalAy = -v_mars;
-v_initalA = sqrt(v_finalAx^2 + v_finalAy^2);
+v_mars_vec = [0;v_mars];
+v_escape_mars2_vec = [v_escape_mars2*sind(hyperbola_angle);-v_escape_mars2*cosd(hyperbola_angle)];
+v_finalA = v_mars_vec + v_escape_mars2_vec;
 
+turn_angle = 180-(2*hyperbola_angle);
+sqrt(2*(v_escape_mars2^2)*cosd(turn_angle))
+norm((v_finalA-v_initalA))
+
+
+
+
+%% Q3
 
 
