@@ -64,36 +64,69 @@ t = sqrt((a^3)/mew_sun)*(pi-0.9223*sin(pi)); % seconds!!!
 %% Q2
 % do a bunch of stuff I don't have time to finish :/
 % given:
-e2 = 1.2;
+e2 = 1.2; 
 rp2 = 5380;
-a2 = 1-(rp2/e2);
 mew_mars = 0.042828 *10^6; % km^3/s^2 - from NASA fact sheet
 % assuming circular orbit
 r_mars = 227.956 * 10^6;
 v_mars = sqrt(mew_sun/r_mars);
 
 % find escape velocity and velocity at periapsis
-v_escape_mars2 = sqrt(-mew_mars/a2);
-v_hyperbola_peri_mars2 = sqrt(2*((mew_mars/rp2) + ((v_escape_mars2^2)/2)));
+v_escape_mars2 = sqrt(((e2-1)*mew_mars)/rp2); % from notes? I guess it works
+v_hyperbola_peri_mars2 = sqrt(2*((mew_mars/rp2) + ((v_escape_mars2^2)/2))); % unused
 
-% Get turn angle
-hyperbola_angle = acosd(1/2);
+% Get the hyperbola angle
+Beta = acosd(1/e2); % get Beta angle
 
 %%% a
 % find v_initial, v_final, and then find deltaV
-v_mars_vec = [0;v_mars];
-v_escape_mars2_vec = [v_escape_mars2*sind(hyperbola_angle);v_escape_mars2*cosd(hyperbola_angle)];
-v_initalA = v_mars_vec + v_escape_mars2_vec;
+v_mars_vecA = [0;v_mars]; % Only acts in Y direction
+v_escape_mars2_vec = [v_escape_mars2*sind(Beta);v_escape_mars2*cosd(Beta)]; % Get the vector components
+v_initalA = v_mars_vecA + v_escape_mars2_vec; % Get the vector sum
 
-v_mars_vec = [0;v_mars];
-v_escape_mars2_vec = [v_escape_mars2*sind(hyperbola_angle);-v_escape_mars2*cosd(hyperbola_angle)];
-v_finalA = v_mars_vec + v_escape_mars2_vec;
+v_escape_mars2_vec = [v_escape_mars2*sind(Beta);-v_escape_mars2*cosd(Beta)]; % Get the new escape vector
+v_finalA = v_mars_vecA + v_escape_mars2_vec; % Get the vector sum
 
-turn_angle = 180-(2*hyperbola_angle);
-sqrt(2*(v_escape_mars2^2)*cosd(turn_angle))
-norm((v_finalA-v_initalA))
+turn_angle = (180-(2*Beta))*(pi/180); % get the turn angle of the parabola
+deltaV_A = sqrt(2*(v_escape_mars2^2)*cos(1-turn_angle)); % get the deltaV using the deltaV eq. from notes
 
+% Now get the norms
+v_initalA_mag = norm(v_initalA);
+v_finalA_mag = norm(v_finalA);
 
+%%% b
+% find v_initial, v_final, and then find deltaV
+mars_vec_angle = 30; % Given angle away from velocity vector
+
+% Get velocity vectors
+v_mars_vecB = [v_mars*sind(mars_vec_angle);v_mars*cosd(mars_vec_angle)];
+v_escape_mars2_vec = [v_escape_mars2*sind(Beta);v_escape_mars2*cosd(Beta)];
+v_initalB = v_mars_vecB + v_escape_mars2_vec; % Get vector sum
+
+% get final stuff
+v_escape_mars2_vec = [v_escape_mars2*sind(Beta);-v_escape_mars2*cosd(Beta)];
+v_finalB = v_mars_vecB + v_escape_mars2_vec; % Get vector sum
+
+% Get deltaV (turn angle does not change!)
+deltaV_B = sqrt(2*(v_escape_mars2^2)*cos(1-turn_angle));
+
+% Get magnitudes
+v_initalB_mag = norm(v_initalB);
+v_finalB_mag = norm(v_finalB);
+
+%%% c
+% do pretty much exactly the same thing as above, again
+v_mars_vecC = [0; -v_mars];
+v_escape_mars2_vec = [v_escape_mars2*sind(Beta);v_escape_mars2*cosd(Beta)];
+v_initalC = v_mars_vecC + v_escape_mars2_vec;
+
+v_escape_mars2_vec = [v_escape_mars2*sind(Beta);-v_escape_mars2*cosd(Beta)];
+v_finalC = v_mars_vecC + v_escape_mars2_vec;
+
+deltaV_C = sqrt(2*(v_escape_mars2^2)*cos(1-turn_angle));
+
+v_initalC_mag = norm(v_initalC);
+v_finalC_mag = norm(v_finalC);
 
 
 %% Q3
