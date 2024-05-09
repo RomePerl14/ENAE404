@@ -5,24 +5,34 @@
 %   ENAE404 - Astrodynamics (UMD)  %
 
 
-
-
 function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_initial_, pos_vec_final_, TOF_, direction_method_, mew_)
     %% SETUP
     % First, get the norm of the inputted position vectors
     pos_vec_initial = pos_vec_initial_;
     pos_vec_final = pos_vec_final_;
-    r_initial = norm(pos_vec_initial_);
-    r_final = norm(pos_vec_final_);
+    r_initial = norm(pos_vec_initial);
+    r_final = norm(pos_vec_final);
     TOF = TOF_;
     mew = mew_;
 
     % Now, get the cos(deltaV)
     cos_delta_true_anom = (dot(pos_vec_initial,pos_vec_final))/(r_initial*r_final);
-
-    % Get the initial A value
-    A = direction_method_*(sqrt(r_initial*r_final*(1+cos_delta_true_anom)));
     
+    % Get the initial A value
+    try
+        if(direction_method_ == "short")
+            A = 1*(sqrt(r_initial*r_final*(1+cos_delta_true_anom)));
+        elseif(direction_method_ == "long")
+            A = -1*(sqrt(r_initial*r_final*(1+cos_delta_true_anom)));
+        else
+            fprintf("\nYou need to give a direction method! Either\n'short'\nor\n'long'\nALL LOWERCASE\n\n");
+            return
+        end
+    catch
+        fprintf("\nYou need to give a direction method! Either\n'short'\nor\n'long'\nALL LOWERCASE\n\n");
+        return
+    end
+
     % Check a few things:
     if(A == 0 || isnan(A))
         fprintf("\nThere is an error! A = 0 or NaN, which should not be!\n\n")
@@ -40,19 +50,18 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
     C2 = 1/2;
     C3 = 1/6;
     psi_up = 4*(pi^2);
-    psi_low = -4*(pi);
+    psi_low = -4*(pi^2);
     deltaT = 0;
 
     %% Start the while loop to iteratively solve for everything
-    tall_er_ant = 10^(-6);
+    tall_er_ant = 0.00001;
     while(abs(TOF-deltaT) >= tall_er_ant)
-        fprintf(int2str(deltaT) + "\n")
         % Get y
-        y = r_initial + r_final + ( A*(psi*C3-1) )/sqrt(C2);
+        y = r_initial + r_final + ( A*((psi*C3)-1) )/sqrt(C2);
         
         % Check our values
         if(A > 0 && y < 0)
-            psi_low = psi_low + 0.01;
+            psi_low = psi_low + (pi/4);
         end
         
         % get x and deltaT
@@ -67,7 +76,7 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
         end
 
         % Get the new psi value (the trident lookin thing)
-        psi = (psi_up-psi_low)/2;
+        psi = (psi_up+psi_low)/2;
 
         % Do some more value checking and find new C2 and C3
         if(psi > tall_er_ant)

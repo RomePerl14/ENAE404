@@ -5,9 +5,7 @@
 %   ENAE404 - Astrodynamics (UMD)  %
 
 
-
-
-function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_initial_, pos_vec_final_, TOF_, direction_method_, mew_)
+function [vel_initial_vec, vel_final_vec, stuck] = romeosEpicLambartSolvor(pos_vec_initial_, pos_vec_final_, TOF_, direction_method_, mew_)
     %% SETUP
     % First, get the norm of the inputted position vectors
     pos_vec_initial = pos_vec_initial_;
@@ -16,6 +14,7 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
     r_final = norm(pos_vec_final);
     TOF = TOF_;
     mew = mew_;
+    count = 0;
 
     % Now, get the cos(deltaV)
     cos_delta_true_anom = (dot(pos_vec_initial,pos_vec_final))/(r_initial*r_final);
@@ -25,7 +24,7 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
         if(direction_method_ == "short")
             A = 1*(sqrt(r_initial*r_final*(1+cos_delta_true_anom)));
         elseif(direction_method_ == "long")
-            A = 1*(sqrt(r_initial*r_final*(1+cos_delta_true_anom)));
+            A = -1*(sqrt(r_initial*r_final*(1+cos_delta_true_anom)));
         else
             fprintf("\nYou need to give a direction method! Either\n'short'\nor\n'long'\nALL LOWERCASE\n\n");
             return
@@ -56,7 +55,7 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
     deltaT = 0;
 
     %% Start the while loop to iteratively solve for everything
-    tall_er_ant = 0.000001;
+    tall_er_ant = 0.00001;
     while(abs(TOF-deltaT) >= tall_er_ant)
         % Get y
         y = r_initial + r_final + ( A*((psi*C3)-1) )/sqrt(C2);
@@ -91,6 +90,16 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
             C2 = 1/2;
             C3 = 1/6;
         end
+        if(abs(TOF-deltaT) >= tall_er_ant)
+            count = count + 1;
+        end
+        if(count == 50000)
+            fprintf("Got stuck in a loop, returning 0's\n")
+            vel_initial_vec = 0;
+            vel_final_vec = 0;
+            stuck = true;
+            return
+        end
     end
     
     % Get final values, f, g, g_dot
@@ -101,5 +110,6 @@ function [vel_initial_vec, vel_final_vec] = romeosEpicLambartSolvor(pos_vec_init
     % Now, get the REAL final values
     vel_initial_vec = (pos_vec_final-f*pos_vec_initial)/g;
     vel_final_vec = (pos_vec_final*g_dot-pos_vec_initial)/g;
+    stuck = false;
     return
 end

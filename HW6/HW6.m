@@ -65,66 +65,66 @@ r2_vec1 = [7000;7000;0];
 % g_dot1 = 1 - (y1/r2_1);
 % v1_vec1 = (r2_vec1 - (f1*r1_vec1))/g1;
 % v2_vec1 = ((g_dot1*r2_vec1) - r1_vec1)/g1;
-[v1_vec1, v1_vec2] = romeosEpicLambartSolvor(r1_vec1, r2_vec1, TOF1, 1, mew_earth);
+[v1_vec1, v1_vec2] = romeosEpicLambartSolvor(r1_vec1, r2_vec1, TOF1, "short", mew_earth);
 
-%%% Case 2
-% Now do it again for case 2
-% copy and pasted from above!!!
-TOF2 = 16135;
-r1_vec2 = [0.5;0.6;0.7]*earth_rad;
-r2_vec2 = [0;-1;0]*earth_rad;
-r1_2 = norm(r1_vec2);
-r2_2 = norm(r2_vec2);
-cos_deltaV2 = (dot(r1_vec2,r2_vec2))/(r1_2*r2_2);
-DM2 = -1; % Given that the thang is short way
-A2 = DM2*sqrt(r1_2*r2_2*(1+cos_deltaV2));
-
-% Adding these for eventual migration to function
-if DM2==0
-    fprintf("YOU GOT AN ERROR BOY");
-end
-if A2==0
-    fprinf("YOU GOT AN ERROR BOY");
-end
-
-% Weird starter numbers I guess?
-trident2 = 0;
-C2_2 = 1/2;
-C3_2 = 1/6;
-trident_hp2 = 4*(pi^2);
-trident_low2 = -4*pi;
-deltat2 = 0;
-
-while(abs(TOF2-deltat2) >= tolerance)
-    y2 = r1_2 + r2_2 + (A2*((trident2*C3_2)-1)/sqrt(C2_2));
-    if(A2>0 && y2 <0)
-        trident_low2 = trident_low2 + 0.1;
-    end
-    x2 = sqrt(y2/C2_2);
-    deltat2 = (((x2^3)*C3_2)+(A2*sqrt(y2)))/sqrt(mew_earth);
-    if deltat2 < TOF2
-        trident_low2 = trident2;
-    else
-        trident_hp2 = trident2;
-    end
-    trident2 = (trident_hp2 + trident_low2)/2;
-    if trident2 > tolerance
-        C2_2 = (1-cos(sqrt(trident2)))/trident2;
-        C3_2 = (sqrt(trident2)-sin(sqrt(trident2)))/sqrt(trident2^3);
-    elseif trident2 < -tolerance
-        C2_2 = (1-cosh(sqrt(-trident2)))/trident2;
-        C3_2 = (sinh(sqrt(-trident2))-sqrt(-trident2))/sqrt(-trident2^3);
-    else
-        C2_2 = 1/2;
-        C3_2 = 1/6;
-    end
-end
-% Now find other stuff (what is going ON with these variables maine)
-f2 = 1 - (y2/r1_2);
-g2 = A2*sqrt(y2/mew_earth);
-g_dot2 = 1 - (y2/r2_2);
-v1_vec2 = (r2_vec2 - (f2*r1_vec2))/g2;
-v2_vec2 = ((g_dot2*r2_vec2) - r1_vec2)/g2;
+% %%% Case 2
+% % Now do it again for case 2
+% % copy and pasted from above!!!
+% TOF2 = 16135;
+% r1_vec2 = [0.5;0.6;0.7]*earth_rad;
+% r2_vec2 = [0;-1;0]*earth_rad;
+% r1_2 = norm(r1_vec2);
+% r2_2 = norm(r2_vec2);
+% cos_deltaV2 = (dot(r1_vec2,r2_vec2))/(r1_2*r2_2);
+% DM2 = -1; % Given that the thang is short way
+% A2 = DM2*sqrt(r1_2*r2_2*(1+cos_deltaV2));
+% 
+% % Adding these for eventual migration to function
+% if DM2==0
+%     fprintf("YOU GOT AN ERROR BOY");
+% end
+% if A2==0
+%     fprinf("YOU GOT AN ERROR BOY");
+% end
+% 
+% % Weird starter numbers I guess?
+% trident2 = 0;
+% C2_2 = 1/2;
+% C3_2 = 1/6;
+% trident_hp2 = 4*(pi^2);
+% trident_low2 = -4*pi;
+% deltat2 = 0;
+% 
+% while(abs(TOF2-deltat2) >= tolerance)
+%     y2 = r1_2 + r2_2 + (A2*((trident2*C3_2)-1)/sqrt(C2_2));
+%     if(A2>0 && y2 <0)
+%         trident_low2 = trident_low2 + 0.1;
+%     end
+%     x2 = sqrt(y2/C2_2);
+%     deltat2 = (((x2^3)*C3_2)+(A2*sqrt(y2)))/sqrt(mew_earth);
+%     if deltat2 < TOF2
+%         trident_low2 = trident2;
+%     else
+%         trident_hp2 = trident2;
+%     end
+%     trident2 = (trident_hp2 + trident_low2)/2;
+%     if trident2 > tolerance
+%         C2_2 = (1-cos(sqrt(trident2)))/trident2;
+%         C3_2 = (sqrt(trident2)-sin(sqrt(trident2)))/sqrt(trident2^3);
+%     elseif trident2 < -tolerance
+%         C2_2 = (1-cosh(sqrt(-trident2)))/trident2;
+%         C3_2 = (sinh(sqrt(-trident2))-sqrt(-trident2))/sqrt(-trident2^3);
+%     else
+%         C2_2 = 1/2;
+%         C3_2 = 1/6;
+%     end
+% end
+% % Now find other stuff (what is going ON with these variables maine)
+% f2 = 1 - (y2/r1_2);
+% g2 = A2*sqrt(y2/mew_earth);
+% g_dot2 = 1 - (y2/r2_2);
+% v1_vec2 = (r2_vec2 - (f2*r1_vec2))/g2;
+% v2_vec2 = ((g_dot2*r2_vec2) - r1_vec2)/g2;
 
 %% Q2
 % Use the 2bodyprop to get orbit data
@@ -144,41 +144,41 @@ case1_initial_state = [r1_vec1(1); r1_vec1(2); r1_vec1(3); v1_vec1(1); v1_vec1(2
 [T1, Y1] = ode45(@myodefun, t, case1_initial_state, ODE_options, mew_earth);
 % checks out!
 
-%%% Case 2
-%%%% Case 1
-%--- ODE func values from HW1---%
-tall_er_ant = (10^-13); % Tolerance
-step_size = 0.01; % step size 
-max_time = 16135; % max time (0->max_time)
-t = [0:step_size:max_time]; % timestep
-
-% get the inital state
-case1_initial_state = [r1_vec2(1); r1_vec2(2); r1_vec2(3); v1_vec2(1); v1_vec2(2); v1_vec2(3);];
-
-[T2, Y2] = ode45(@myodefun, t, case1_initial_state, ODE_options, mew_earth);
-% checks out!
-
-
-
-%% Q3
-% Using the data from case 1, find the deltaV
-% find orbital parameters at r2
-[i3, omega3, w3, true_anom3, e_x3, e_y3, e_z3, a3, spef_energy3] = cartToOrbitalElements(r2_vec1, v2_vec1, mew_earth, "rad");
-e3 = norm([e_x3, e_y3, e_z3]);
-
-% find rp, ra
-rp3 = a3*(1-e3);
-ra3 = a3*(1+e3);
-
-% now find the stuff considering Hohmann transfer
-v_tf_peri3 = sqrt((2*mew_earth)/rp3 - (2*mew_earth)/(rp3 + ra3));
-v_tf_apo3 = sqrt((2*mew_earth)/ra3 - (2*mew_earth)/(rp3 + ra3));
-v_circ_i3 = sqrt(mew_earth/rp3);
-v_circ_f3 = sqrt(mew_earth/ra3);
-
-deltaV1_3 = v_tf_peri3 - v_circ_i3;
-deltaV2_3 = v_circ_f3 - v_tf_apo3;
-deltaV_3 = deltaV1_3 + deltaV2_3; % Got it!
+% %%% Case 2
+% %%%% Case 1
+% %--- ODE func values from HW1---%
+% tall_er_ant = (10^-13); % Tolerance
+% step_size = 0.01; % step size 
+% max_time = 16135; % max time (0->max_time)
+% t = [0:step_size:max_time]; % timestep
+% 
+% % get the inital state
+% case1_initial_state = [r1_vec2(1); r1_vec2(2); r1_vec2(3); v1_vec2(1); v1_vec2(2); v1_vec2(3);];
+% 
+% [T2, Y2] = ode45(@myodefun, t, case1_initial_state, ODE_options, mew_earth);
+% % checks out!
+% 
+% 
+% 
+% %% Q3
+% % Using the data from case 1, find the deltaV
+% % find orbital parameters at r2
+% [i3, omega3, w3, true_anom3, e_x3, e_y3, e_z3, a3, spef_energy3] = cartToOrbitalElements(r2_vec1, v2_vec1, mew_earth, "rad");
+% e3 = norm([e_x3, e_y3, e_z3]);
+% 
+% % find rp, ra
+% rp3 = a3*(1-e3);
+% ra3 = a3*(1+e3);
+% 
+% % now find the stuff considering Hohmann transfer
+% v_tf_peri3 = sqrt((2*mew_earth)/rp3 - (2*mew_earth)/(rp3 + ra3));
+% v_tf_apo3 = sqrt((2*mew_earth)/ra3 - (2*mew_earth)/(rp3 + ra3));
+% v_circ_i3 = sqrt(mew_earth/rp3);
+% v_circ_f3 = sqrt(mew_earth/ra3);
+% 
+% deltaV1_3 = v_tf_peri3 - v_circ_i3;
+% deltaV2_3 = v_circ_f3 - v_tf_apo3;
+% deltaV_3 = deltaV1_3 + deltaV2_3; % Got it!
 
 
 

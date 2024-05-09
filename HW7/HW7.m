@@ -193,7 +193,44 @@ legend
 % escape if there is no modeled force of gravity "hold you back" (resisting
 % the spacecrafts power to escape orbit)
 
+%% Q2
+% Find stuff with things
+mew_mars = 0.042828*10^6;
 
+% Given
+rp = 1000;
+e = 0.25;
+a = rp/(1-e);
+ra = a*(1+e);
+
+% Get the periapsis speed
+v_peri = sqrt((2*mew_mars)/rp - (2*mew_mars)/(rp+ra));
+v_circ = sqrt(mew_mars/rp);
+deltaV = v_peri-v_circ;
+
+% now solve for propellent change
+Isp = 250;
+g = 9.81*(10^-3);
+mi = 1500;
+mi_over_mf = exp(deltaV/(Isp*g));
+mf = mi/mi_over_mf;
+
+deltaM = mi*(1-exp(-deltaV/(Isp*g)));
+mf-mi;
+
+%%% part 2
+% given:
+struct_ratio = 0.15;
+
+% Find n (mass ratio)
+n = mi/mf;
+
+% now, find lambda (payload ratio)
+lambda = (n*struct_ratio-1)/(1-n);
+
+% For shits and giggles, get payload mass
+mpl = (lambda*mi)/(1+lambda);
+me = struct_ratio*(mi-mpl);
 
 %% Q3
 mew_sun = 132712*10^6; % km^3/s^2
@@ -203,68 +240,104 @@ starting_depart_date = ymdhms2jd(2022, 8, 1, 12, 0, 0);
 starting_arrival_date = ymdhms2jd(2023, 1, 28, 12, 0, 0);
 
 TOF_matrix(500,500) = 0;
+TOF_matrix_check(500,500) = 0;
 Julian_matrix(500,500) = 0;
 for i=0:1:499
     for ii=0:1:499
-        TOF_matrix(i+1,ii+1) = ((starting_arrival_date+i) - (starting_depart_date+ii))*24*60*60;
+        TOF_matrix(ii+1,i+1) = ((starting_arrival_date+ii) - (starting_depart_date+i))*24*60*60;
+        TOF_matrix_check(ii+1,i+1) = (starting_arrival_date+ii) - (starting_depart_date+i);
+        if(TOF_matrix_check(ii+1,i+1) <= 0)
+            TOF_matrix(ii+1,i+1) = 0;
+            TOF_matrix_check(ii+1,i+1) = 0;
+        end
     end
 end
 
+% LAUNCH IS X AXIS, ARRIVAL IS Y
 V_infinity_matrix(500,500) = 0;
 C3_martix(500,500) = 0;
 for i=0:1:499
     for ii=0:1:499
-        [r1_vec, vel_earth] = findEarth(starting_depart_date+ii);
-        [r2_vec, vel_mars] = findMars(starting_arrival_date+i);
+        % Find the position vectors of earth and mars
+        [r1_vec, vel_earth] = findEarth(starting_depart_date+i);
+        [r2_vec, vel_mars] = findMars(starting_arrival_date+ii);
+        TOF = TOF_matrix(ii+1, i+1);
+        % If our number is less than 45 degrees, we're close to an
+        % impossible TOF (and out of bounds of the problem statement
+        % anyway), so skip it and set our velocities to 0
+        if(TOF_matrix_check(ii+1,i+1) <= 45)
+%             fprintf("skipping\n")
+            V_infinity_matrix(ii+1,i+1) = 0;
+            C3_martix(ii+1,i+1) = 0;
+%         elseif(TOF_matrix_check(i+1,ii+1) == 0)
+%             fprintf("skipping2\n")
+%             V_infinity_matrix(ii+1,i+1) = 0;
+%             C3_martix(ii+1,i+1) = 0;
+        else % If we're all good in the hood, actually find everything
+            % Fist case, short way
+            [v1_vec, v2_vec, stuck1] = romeosEpicLambartSolvor(r1_vec, r2_vec, TOF, "short", mew_sun);
+            V_infinity_earth1 = v1_vec - vel_earth;
+            V_infinity_mars1 = v2_vec - vel_mars;
+            % Get the magnitude:
+            val1 = norm(V_infinity_earth1) + norm(V_infinity_mars1);
 
-        % Fist case, short way
-        [v1_vec, v2_vec] = romeosEpicLambartSolvor(r1_vec, r2_vec, TOF(i+1,ii+1), 1, mew_sun);
-        V_infinity_earth1 = v1_vec - vel_earth;
-        V_infinity_mars1 = v2_vec - vel_mars;
-        % Get the magnitude:
-        val1 = norm(V_infinity_earth1) + norm(V_infinity_mars1);
-        
-        % Second case, long way
-        [v1_vec, v2_vec] = romeosEpicLambartSolvor(r1_vec, r2_vec, TOF(i+1,ii+1), -1, mew_sun);
-        V_infinity_earth2 = v1_vec - vel_earth;
-        V_infinity_mars2 = v2_vec - vel_mars;
-        % Get the magnitude:
-        val2 = norm(V_infinity_earth2) + norm(V_infinity_mars2);
+            % Second case, long way
+            [v1_vec, v2_vec, stuck2] = romeosEpicLambartSolvor(r1_vec, r2_vec, TOF, "long", mew_sun);
+            V_infinity_earth2 = v1_vec - vel_earth;
+            V_infinity_mars2 = v2_vec - vel_mars;
+            % Get the magnitude:
+            val2 = norm(V_infinity_earth2) + norm(V_infinity_mars2);
 
-        % now find which mag sum is smaller, and keep it:
-        if (val1 < val2)
-            C3_REAL= (norm(V_infinity_earth1))^2;
-            V_infinity_REAL = norm(V_infinity_mars1);
-        elseif (val2 < val1)
-            C3_REAL = (norm(V_infinity_earth2))^2;
-            V_infinity_REAL = norm(V_infinity_mars2);
-        else % for some reason if either conditional doesn't occur, just keep the short way
-            C3_REAL= (norm(V_infinity_earth1))^2;
-            V_infinity_REAL = norm(V_infinity_mars1);
+            if(stuck1 == true && stuck2 == true)
+%                 fprintf("skipping1\n")
+                V_infinity_matrix(ii+1,i+1) = 0;
+                C3_martix(ii+1,i+1) = 0;
+            end
+    
+            % now find which mag sum is smaller, and keep it:
+            if (val1 < val2)
+                C3_REAL = (norm(V_infinity_earth1))^2;
+                V_infinity_REAL = norm(V_infinity_mars1);
+            elseif (val2 < val1)
+                C3_REAL = (norm(V_infinity_earth2))^2;
+                V_infinity_REAL = norm(V_infinity_mars2);
+            elseif (val1 == val2)
+                C3_REAL = (norm(V_infinity_earth1))^2;
+                V_infinity_REAL = norm(V_infinity_mars1);
+            end
+            % Save the value into our matricies for plotting purposes!
+            V_infinity_matrix(ii+1,i+1) = V_infinity_REAL;
+            C3_martix(ii+1,i+1) = C3_REAL;
+
+            % If we got stuck, just skip and set the value to 0, it's
+            % probably not meant to be (I have no idea why it's getting
+            % stuck, end me please!
+            if(stuck1 == true && stuck2 == true)
+%                 fprintf("skipping1\n")
+                V_infinity_matrix(ii+1,i+1) = 0;
+                C3_martix(ii+1,i+1) = 0;
+            end
         end
-        V_infinity_matrix(i+1,ii+1) = V_infinity_REAL;
-        C3_martix(i+1,ii+1) = C3_REAL;
+%         fprintf("Loading, please wait...\nIterations complete: " + int2str(i) +", " + int2str(ii) + "\n")
     end
 end
 
 figure
 hold on
-contour(TOF_matrix, "-k", DisplayName="TOF")
+% contour(TOF_matrix, "-k", DisplayName="TOF");
+[C, h] = contour(TOF_matrix_check, "-k", DisplayName="TOF");
+clabel(C, h)
+
 contour(V_infinity_matrix, "-r", DisplayName="V_i_n_f_i_n_i_t_y")
 contour(C3_martix, "-b", DisplayName="C3")
+legend
+title("Pork-Chop plot for Provided Robotic Mission criteria")
+xlabel("Days after 8/1/2022")
+ylabel("Days after 1/28/2023")
 
-
-
-
-
-
-
-
-
-
-
-
-
+% Contours are not like the example, but after hours of debugging and I
+% can't seem to find out why. OH WELL I GUESS... I FUCKING HATE LAMBERT
+% AHHHHH I HATE LAMBERT (its probably my TOF and not lambert)
 
 
 
