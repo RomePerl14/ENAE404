@@ -13,58 +13,59 @@ earth_rad = 6378; % km
 TOF1 = 3600;
 r1_vec1 = [8000;0;0];
 r2_vec1 = [7000;7000;0];
-r1_1 = norm(r1_vec1);
-r2_1 = norm(r2_vec1);
-cos_deltaV1 = (dot(r1_vec1,r2_vec1))/(r1_1*r2_1);
-DM1 = 1; % Given that the thang is short way
-A1 = DM1*sqrt(r1_1*r2_1*(1+cos_deltaV1));
-
-% Adding these for eventual migration to function
-if DM1==0
-    fprintf("YOU GOT AN ERROR BOY");
-end
-if A1==0
-    fprinf("YOU GOT AN ERROR BOY");
-end
-
-% Weird starter numbers I guess?
-trident1 = 0;
-C2_1 = 1/2;
-C3_1 = 1/6;
-trident_hp1 = 4*(pi^2);
-trident_low1 = -4*pi;
-deltat1 = 0;
-tolerance = 10^-6; % good tolerance
-while(abs(TOF1-deltat1) >= tolerance)
-    y1 = r1_1 + r2_1 + (A1*((trident1*C3_1)-1)/sqrt(C2_1));
-    if(A1>0 && y1 <0)
-        trident_low1 = trident_low1 + 0.1;
-    end
-    x1 = sqrt(y1/C2_1);
-    deltat1 = (((x1^3)*C3_1)+(A1*sqrt(y1)))/sqrt(mew_earth);
-    if deltat1 < TOF1
-        trident_low1 = trident1;
-    else
-        trident_hp1 = trident1;
-    end
-    trident1 = (trident_hp1 + trident_low1)/2;
-    if trident1 > tolerance
-        C2_1 = (1-cos(sqrt(trident1)))/trident1;
-        C3_1 = (sqrt(trident1)-sin(sqrt(trident1)))/sqrt(trident1^3);
-    elseif trident1 < -tolerance
-        C2_1 = (1-cosh(sqrt(-trident1)))/trident1;
-        C3_1 = (sinh(sqrt(-trident1))-sqrt(-trident1))/sqrt(-trident1^3);
-    else
-        C2_1 = 1/2;
-        C3_1 = 1/6;
-    end
-end
-% Now find other stuff (what is going ON with these variables maine)
-f1 = 1 - (y1/r1_1);
-g1 = A1*sqrt(y1/mew_earth);
-g_dot1 = 1 - (y1/r2_1);
-v1_vec1 = (r2_vec1 - (f1*r1_vec1))/g1;
-v2_vec1 = ((g_dot1*r2_vec1) - r1_vec1)/g1;
+% r1_1 = norm(r1_vec1);
+% r2_1 = norm(r2_vec1);
+% cos_deltaV1 = (dot(r1_vec1,r2_vec1))/(r1_1*r2_1);
+% DM1 = 1; % Given that the thang is short way
+% A1 = DM1*sqrt(r1_1*r2_1*(1+cos_deltaV1));
+% 
+% % Adding these for eventual migration to function
+% if DM1==0
+%     fprintf("YOU GOT AN ERROR BOY");
+% end
+% if A1==0
+%     fprinf("YOU GOT AN ERROR BOY");
+% end
+% 
+% % Weird starter numbers I guess?
+% trident1 = 0;
+% C2_1 = 1/2;
+% C3_1 = 1/6;
+% trident_hp1 = 4*(pi^2);
+% trident_low1 = -4*pi;
+% deltat1 = 0;
+% tolerance = 10^-6; % good tolerance
+% while(abs(TOF1-deltat1) >= tolerance)
+%     y1 = r1_1 + r2_1 + (A1*((trident1*C3_1)-1)/sqrt(C2_1));
+%     if(A1>0 && y1 <0)
+%         trident_low1 = trident_low1 + 0.1;
+%     end
+%     x1 = sqrt(y1/C2_1);
+%     deltat1 = (((x1^3)*C3_1)+(A1*sqrt(y1)))/sqrt(mew_earth);
+%     if deltat1 < TOF1
+%         trident_low1 = trident1;
+%     else
+%         trident_hp1 = trident1;
+%     end
+%     trident1 = (trident_hp1 + trident_low1)/2;
+%     if trident1 > tolerance
+%         C2_1 = (1-cos(sqrt(trident1)))/trident1;
+%         C3_1 = (sqrt(trident1)-sin(sqrt(trident1)))/sqrt(trident1^3);
+%     elseif trident1 < -tolerance
+%         C2_1 = (1-cosh(sqrt(-trident1)))/trident1;
+%         C3_1 = (sinh(sqrt(-trident1))-sqrt(-trident1))/sqrt(-trident1^3);
+%     else
+%         C2_1 = 1/2;
+%         C3_1 = 1/6;
+%     end
+% end
+% % Now find other stuff (what is going ON with these variables maine)
+% f1 = 1 - (y1/r1_1);
+% g1 = A1*sqrt(y1/mew_earth);
+% g_dot1 = 1 - (y1/r2_1);
+% v1_vec1 = (r2_vec1 - (f1*r1_vec1))/g1;
+% v2_vec1 = ((g_dot1*r2_vec1) - r1_vec1)/g1;
+[v1_vec1, v1_vec2] = romeosEpicLambartSolvor(r1_vec1, r2_vec1, TOF1, 1, mew_earth);
 
 %%% Case 2
 % Now do it again for case 2
